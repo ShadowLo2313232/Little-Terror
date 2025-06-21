@@ -34,14 +34,14 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: #111;
+      background: url('https://i.imgur.com/6rJqUoK.jpg') no-repeat center center/cover;
       display: none;
     }
     #player {
       position: absolute;
       width: 50px;
       height: 50px;
-      background: purple;
+      background: url('https://i.imgur.com/R8WQeP5.png') no-repeat center center/contain;
     }
     .child, #guard {
       position: absolute;
@@ -49,11 +49,10 @@
       height: 40px;
     }
     .child {
-      background: yellow;
+      background: url('https://i.imgur.com/b0mVVY4.png') no-repeat center center/contain;
     }
     #guard {
-      background: white;
-      border: 3px solid red;
+      background: url('https://i.imgur.com/GQ0JZ7A.png') no-repeat center center/contain;
     }
     #hud {
       position: absolute;
@@ -66,7 +65,7 @@
       justify-content: space-between;
       align-items: center;
     }
-    #caughtMessage {
+    #caughtMessage, #rHint {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -74,6 +73,10 @@
       font-size: 48px;
       color: red;
       display: none;
+    }
+    #rHint {
+      color: white;
+      font-size: 24px;
     }
   </style>
 </head>
@@ -113,6 +116,7 @@
     <div class="child" style="top:100px; left:700px;"></div>
     <div id="guard" style="top:500px; left:500px;"></div>
     <div id="caughtMessage">YAKALANDIN</div>
+    <div id="rHint">R tuşuna basarak korkut!</div>
   </div>
 
   <script>
@@ -123,6 +127,7 @@
     let caughtMsg = document.getElementById('caughtMessage');
     let charInfo = document.getElementById('charInfo');
     let langInfo = document.getElementById('langInfo');
+    let rHint = document.getElementById('rHint');
 
     let px = 100, py = 100, score = 0;
     let gameInterval, guardInterval;
@@ -138,31 +143,36 @@
       player.style.left = px + 'px';
       player.style.top = py + 'px';
 
-      document.addEventListener('keydown', movePlayer);
+      document.addEventListener('keydown', handleInput);
       gameInterval = setInterval(checkCollision, 100);
       guardInterval = setInterval(moveGuard, 300);
+      rHint.style.display = 'block';
+      setTimeout(() => rHint.style.display = 'none', 4000);
     }
 
-    function movePlayer(e) {
-      if (e.key === 'ArrowUp') py -= 10;
-      if (e.key === 'ArrowDown') py += 10;
-      if (e.key === 'ArrowLeft') px -= 10;
-      if (e.key === 'ArrowRight') px += 10;
+    function handleInput(e) {
+      if (e.key === 'w') py -= 10;
+      if (e.key === 's') py += 10;
+      if (e.key === 'a') px -= 10;
+      if (e.key === 'd') px += 10;
+      if (e.key === 'r') scareChildren();
       player.style.left = px + 'px';
       player.style.top = py + 'px';
     }
 
-    function checkCollision() {
+    function scareChildren() {
       children.forEach(child => {
         let cx = child.offsetLeft;
         let cy = child.offsetTop;
-        if (Math.abs(px - cx) < 40 && Math.abs(py - cy) < 40 && child.style.display !== 'none') {
+        if (Math.abs(px - cx) < 60 && Math.abs(py - cy) < 60 && child.style.display !== 'none') {
           child.style.display = 'none';
           score++;
           scoreEl.textContent = 'Korkutulan: ' + score;
         }
       });
+    }
 
+    function checkCollision() {
       let gx = guard.offsetLeft;
       let gy = guard.offsetTop;
       if (Math.abs(px - gx) < 40 && Math.abs(py - gy) < 40) {
@@ -171,8 +181,8 @@
     }
 
     function moveGuard() {
-      let gx = guard.offsetLeft + (Math.random() * 40 - 20);
-      let gy = guard.offsetTop + (Math.random() * 40 - 20);
+      let gx = guard.offsetLeft + (Math.random() * 60 - 30);
+      let gy = guard.offsetTop + (Math.random() * 60 - 30);
       guard.style.left = gx + 'px';
       guard.style.top = gy + 'px';
     }
