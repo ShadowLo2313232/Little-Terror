@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Little Terror</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: white;
+      overflow: hidden;
+    }
+    .screen {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    select, button {
+      padding: 10px;
+      margin: 10px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: none;
+    }
+    #gameArea {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #111;
+      display: none;
+    }
+    #player {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: purple;
+    }
+    .child, #guard {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+    }
+    .child {
+      background: yellow;
+    }
+    #guard {
+      background: white;
+      border: 3px solid red;
+    }
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: rgba(0,0,0,0.7);
+      padding: 10px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #caughtMessage {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      color: red;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="startScreen" class="screen">
+    <h1>👹 Little Terror 👹</h1>
+    <label>Dil Seç:</label>
+    <select id="langSelect">
+      <option value="tr">Türkçe</option>
+      <option value="en">English</option>
+      <option value="es">Español</option>
+      <option value="zh">中文</option>
+      <option value="ja">日本語</option>
+      <option value="ko">한국어</option>
+      <option value="af">Afrika</option>
+    </select>
+
+    <label>Karakter Seç:</label>
+    <select id="charSelect">
+      <option value="vampire">🧛 Vampir</option>
+      <option value="werewolf">🐺 Kurt Adam</option>
+      <option value="chucky">🔪 Chucky</option>
+    </select>
+
+    <button onclick="startGame()">Oyuna Başla</button>
+  </div>
+
+  <div id="gameArea">
+    <div id="hud">
+      <span id="charInfo"></span>
+      <span id="langInfo"></span>
+      <span id="score">Korkutulan: 0</span>
+    </div>
+    <div id="player"></div>
+    <div class="child" style="top:200px; left:400px;"></div>
+    <div class="child" style="top:300px; left:600px;"></div>
+    <div class="child" style="top:100px; left:700px;"></div>
+    <div id="guard" style="top:500px; left:500px;"></div>
+    <div id="caughtMessage">YAKALANDIN</div>
+  </div>
+
+  <script>
+    let player = document.getElementById('player');
+    let guard = document.getElementById('guard');
+    let children = document.querySelectorAll('.child');
+    let scoreEl = document.getElementById('score');
+    let caughtMsg = document.getElementById('caughtMessage');
+    let charInfo = document.getElementById('charInfo');
+    let langInfo = document.getElementById('langInfo');
+
+    let px = 100, py = 100, score = 0;
+    let gameInterval, guardInterval;
+
+    function startGame() {
+      const char = document.getElementById('charSelect').value;
+      const lang = document.getElementById('langSelect').value;
+      charInfo.textContent = 'Karakter: ' + char;
+      langInfo.textContent = 'Dil: ' + lang;
+
+      document.getElementById('startScreen').style.display = 'none';
+      document.getElementById('gameArea').style.display = 'block';
+      player.style.left = px + 'px';
+      player.style.top = py + 'px';
+
+      document.addEventListener('keydown', movePlayer);
+      gameInterval = setInterval(checkCollision, 100);
+      guardInterval = setInterval(moveGuard, 300);
+    }
+
+    function movePlayer(e) {
+      if (e.key === 'ArrowUp') py -= 10;
+      if (e.key === 'ArrowDown') py += 10;
+      if (e.key === 'ArrowLeft') px -= 10;
+      if (e.key === 'ArrowRight') px += 10;
+      player.style.left = px + 'px';
+      player.style.top = py + 'px';
+    }
+
+    function checkCollision() {
+      children.forEach(child => {
+        let cx = child.offsetLeft;
+        let cy = child.offsetTop;
+        if (Math.abs(px - cx) < 40 && Math.abs(py - cy) < 40 && child.style.display !== 'none') {
+          child.style.display = 'none';
+          score++;
+          scoreEl.textContent = 'Korkutulan: ' + score;
+        }
+      });
+
+      let gx = guard.offsetLeft;
+      let gy = guard.offsetTop;
+      if (Math.abs(px - gx) < 40 && Math.abs(py - gy) < 40) {
+        caught();
+      }
+    }
+
+    function moveGuard() {
+      let gx = guard.offsetLeft + (Math.random() * 40 - 20);
+      let gy = guard.offsetTop + (Math.random() * 40 - 20);
+      guard.style.left = gx + 'px';
+      guard.style.top = gy + 'px';
+    }
+
+    function caught() {
+      clearInterval(gameInterval);
+      clearInterval(guardInterval);
+      caughtMsg.style.display = 'block';
+      setTimeout(() => {
+        location.reload();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
